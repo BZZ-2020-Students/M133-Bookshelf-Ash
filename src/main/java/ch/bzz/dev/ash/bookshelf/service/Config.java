@@ -6,26 +6,54 @@ import jakarta.ws.rs.core.Application;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 @ApplicationPath("/resource")
 public class Config extends Application {
     private static Properties properties;
+    private static final String PROPERTIES_PATH = "C:\\data\\bookList.properties";
 
 
-    public String getProperties(String key) {
-        checkIfPropertyExists();
-        return properties.getProperty(key);
+    /**
+     * Gets the value of a property
+     *
+     * @param property the key of the property to be read
+     * @return the value of the property
+     */
+    public static String getProperty(String property) {
+        if (Config.properties == null) {
+            setProperties(new Properties());
+            readProperties();
+        }
+        String value = Config.properties.getProperty(property);
+        if (value == null) return "";
+        return value;
     }
 
-    private static void checkIfPropertyExists() {
-        if (properties == null) {
-            properties = new Properties();
-            try (InputStream input = new FileInputStream(Config.class.getClassLoader().getResource("config.properties").getFile())) {
-                properties.load(input);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+    /**
+     * reads the properties file
+     */
+    private static void readProperties() {
+
+        InputStream inputStream;
+        try {
+            inputStream = new FileInputStream(PROPERTIES_PATH);
+            properties.load(inputStream);
+            if (inputStream != null) inputStream.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            throw new RuntimeException();
         }
+    }
+
+    /**
+     * Sets the properties
+     *
+     * @param properties the value to set
+     */
+    private static void setProperties(Properties properties) {
+        Config.properties = properties;
     }
 }
